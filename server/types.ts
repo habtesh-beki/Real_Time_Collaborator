@@ -1,5 +1,5 @@
 export const SOCKET_TYPE = {
-  CONNECT: "connection",
+  CONNECT: "connect",
   JOIN: "join-room",
   USER_EXIST: "user-exist",
   TYPEING: "typeing",
