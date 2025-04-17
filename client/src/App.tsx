@@ -1,4 +1,6 @@
 import { io } from "socket.io-client";
+import { router } from "./router";
+import { RouterProvider } from "react-router";
 import { useEffect } from "react";
 
 function App() {
@@ -8,7 +10,7 @@ function App() {
       console.log("connect with server");
     });
   }, []);
-  return <div className="text-black">Hi There</div>;
+  return <RouterProvider router={router} />;
 }
 
 export default App;
