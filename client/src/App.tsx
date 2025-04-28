@@ -1,14 +1,22 @@
 import { io } from "socket.io-client";
+import { router } from "./router";
+import { RouterProvider } from "react-router";
 import { useEffect } from "react";
+import { Toaster } from "sonner";
 
-function App() {
+export const socket = io("http://localhost:3000");
+export function App() {
   useEffect(() => {
-    const socket = io("http://localhost:3000");
     socket.on("connect", () => {
       console.log("connect with server");
     });
   }, []);
-  return <div className="text-black">Hi There</div>;
+  return (
+    <>
+      <Toaster position="top-center" richColors />
+      <RouterProvider router={router} />
+    </>
+  );
 }
 
-export default App;
+// export  App;

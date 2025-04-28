@@ -2,6 +2,7 @@ import express from "express";
 import http from "http";
 import { Server } from "socket.io";
 import { SOCKET_TYPE } from "./types";
+import LoginRoute from "./routes/login.route";
 
 const app = express();
 const server = http.createServer(app);
@@ -36,26 +37,43 @@ const getUserBySocketId = (socketId: string) => {
 };
 
 io.on(SOCKET_TYPE.CONNECT, (socket) => {
-  console.log("socket connected");
-  socket.on(SOCKET_TYPE.JOIN, (roomID: string, username: string) => {
-    const userAlreadyExist = roomsAsAgust.filter((user) => {
-      user.username == username;
-    });
+  console.log("socket connected with the id:", socket.id);
+  socket.on(
+    "join-room",
+    (
+      { roomID, username }: { roomID: String; username: String },
+      callback: any
+    ) => {
+      if (!roomID || !username) {
+        if (callback) callback("Room ID and username are required");
+        return;
+      }
 
-    if (userAlreadyExist) {
-      socket.emit(SOCKET_TYPE.USER_EXIST, "user already exist");
-    } else {
+      const userAlreadyExist = roomsAsAgust.some(
+        (user) => user.username === username && user.roomID === roomID
+      );
+
+      if (userAlreadyExist) {
+        if (callback) callback("User already exists in this room");
+        socket.emit(SOCKET_TYPE.USER_EXIST, "User already exists");
+        return;
+      }
+
       const newUser = {
-        roomID: roomID,
-        username: username,
+        roomID,
+        username,
         typing: false,
         socketId: socket.id,
         cursorPosition: 0,
       };
       roomsAsAgust.push(newUser);
       socket.join(roomID);
+      socket.to(roomID).emit(SOCKET_TYPE.JOIN_SUCCESS, {
+        username,
+        totalUsers: roomsAsAgust.filter((u) => u.roomID === roomID).length,
+      });
     }
-  });
+  );
 
   socket.on(SOCKET_TYPE.UPDATED_CODE, (newCode: string) => {
     const roomId = findRoomById(socket.id);
@@ -80,6 +98,8 @@ io.on(SOCKET_TYPE.CONNECT, (socket) => {
     socket.in(socket.io).socketsLeave(roomID);
   });
 });
+
+app.use(LoginRoute);
 
 server.listen(3000, () => {
   console.log("server listening on port 3000");

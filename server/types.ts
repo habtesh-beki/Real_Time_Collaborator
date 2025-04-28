@@ -7,4 +7,6 @@ export const SOCKET_TYPE = {
   CUROSR_POSITION: "cursor-positon",
   PAUSE: "pause",
   LEAVE: "leave",
+  ERROR: "Error-join",
+  JOIN_SUCCESS: "join-success",
 };
