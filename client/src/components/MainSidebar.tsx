@@ -1,12 +1,5 @@
 import { Tooltip } from "react-tooltip";
-import {
-  Calendar,
-  Brush,
-  File,
-  Search,
-  MessageCircleMore,
-  Settings,
-} from "lucide-react";
+import { Brush, File, Search, MessageCircleMore, Settings } from "lucide-react";
 
 export default function MainSidebar() {
   return (
