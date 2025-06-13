@@ -21,13 +21,17 @@ export default function GustPage() {
       console.log("Please insert username and room ID");
       return;
     }
-    socket.emit("join-room", { roomID, username }, (error: any) => {
-      if (error) {
-        console.error("Join error:", error);
-      } else {
-        console.log("Joined room:", roomID, username);
+    socket.emit(
+      "join-room",
+      { roomID, username, unkownUser: true },
+      (error: any) => {
+        if (error) {
+          console.error("Join error:", error);
+        } else {
+          console.log("Joined room:", roomID, username);
+        }
       }
-    });
+    );
   };
   return (
     <div className="w-full h-screen flex justify-center items-center bg-[#077A7D]">

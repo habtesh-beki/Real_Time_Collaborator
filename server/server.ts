@@ -21,6 +21,7 @@ const io = new Server(server, {
     origin: "*",
   },
 });
+
 type GustType = {
   username: String;
   roomID: String;
@@ -51,14 +52,17 @@ io.on(SOCKET_TYPE.CONNECT, (socket) => {
   socket.on(
     "join-room",
     (
-      { roomID, username }: { roomID: String; username: String },
+      {
+        roomID,
+        username,
+      }: { roomID: String; username: String; unkownUser: Boolean },
       callback: any
     ) => {
       if (!roomID || !username) {
         if (callback) callback("Room ID and username are required");
         return;
       }
-
+      console.log(roomID, username);
       const userAlreadyExist = roomsAsAgust.some(
         (user) => user.username === username && user.roomID === roomID
       );
@@ -76,6 +80,7 @@ io.on(SOCKET_TYPE.CONNECT, (socket) => {
         socketId: socket.id,
         cursorPosition: 0,
       };
+
       roomsAsAgust.push(newUser);
       socket.join(roomID);
       socket.to(roomID).emit(SOCKET_TYPE.JOIN_SUCCESS, {
@@ -87,6 +92,7 @@ io.on(SOCKET_TYPE.CONNECT, (socket) => {
 
   socket.on(SOCKET_TYPE.UPDATED_CODE, (newCode: string) => {
     const roomId = findRoomById(socket.id);
+    console.log(newCode);
     socket.broadcast.to(roomId).emit(SOCKET_TYPE.UPDATED_CODE, newCode);
   });
 

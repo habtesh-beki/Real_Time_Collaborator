@@ -1,6 +1,7 @@
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
-import { signUp, signIn } from "../../lib/auth-client";
+import { signIn } from "../../lib/auth-client";
+import { Link } from "react-router";
 
 export default function Login() {
   return (
@@ -16,7 +17,9 @@ export default function Login() {
           </div>
           <Button className="cursor-pointer mt-4">Login</Button>
         </div>
-        <Button>Continue As A Gust</Button>
+        <Link to="/gust" className="w-full">
+          <Button className="w-full">Continue As A Gust</Button>
+        </Link>
         <p className="cursor-pointer hover:text-white">
           Don’t have an account?
         </p>

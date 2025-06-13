@@ -5,3 +5,5 @@ create table "session" ("id" text not null primary key, "expiresAt" timestamp no
 create table "account" ("id" text not null primary key, "accountId" text not null, "providerId" text not null, "userId" text not null references "user" ("id"), "accessToken" text, "refreshToken" text, "idToken" text, "accessTokenExpiresAt" timestamp, "refreshTokenExpiresAt" timestamp, "scope" text, "password" text, "createdAt" timestamp not null, "updatedAt" timestamp not null);
 
 create table "verification" ("id" text not null primary key, "identifier" text not null, "value" text not null, "expiresAt" timestamp not null, "createdAt" timestamp, "updatedAt" timestamp);
+
+create table "user_room_activity" (id SIRIAL primary key, user_id INTEGER NOT NULL, roomId VARCHAR(255) NOT NULL , typing BOOLEAN DEFAULT FALSE, cursor_position INTEGER DEFAULT 0 ,FORIGN key (user_id) references user(id));

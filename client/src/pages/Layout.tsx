@@ -3,6 +3,7 @@ import { Toaster, toast } from "sonner";
 import MainSidebar from "../components/MainSidebar";
 import EditorSideBar from "../futures/codeEditor/components/EditorSide";
 import EditorPage from "../futures/codeEditor/EditorPage";
+import DrawingPage from "../futures/Drawing/drawingPage";
 
 export default function Layout() {
   socket.on("join-success", (data) => {
@@ -22,8 +23,9 @@ export default function Layout() {
       </div>
       <div className="flex w-full">
         <MainSidebar />
-        <EditorSideBar />
-        <EditorPage />
+        {/* <EditorSideBar /> */}
+        {/* <EditorPage /> */}
+        <DrawingPage />
       </div>
     </div>
   );
