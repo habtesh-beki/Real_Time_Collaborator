@@ -39,6 +39,7 @@ const findRoomById = (socketId: string) => {
   }
   return Room;
 };
+
 const getUserBySocketId = (socketId: string) => {
   const User = roomsAsAgust.find((room) => (room.socketId = socketId));
   if (!User) {
@@ -47,8 +48,12 @@ const getUserBySocketId = (socketId: string) => {
   return User;
 };
 
+// Store drawing states for each room
+const roomDrawingStates = new Map<string, any>();
+
 io.on(SOCKET_TYPE.CONNECT, (socket) => {
   console.log("socket connected with the id:", socket.id);
+
   socket.on(
     "join-room",
     (
@@ -83,6 +88,12 @@ io.on(SOCKET_TYPE.CONNECT, (socket) => {
 
       roomsAsAgust.push(newUser);
       socket.join(roomID);
+
+      // Send current drawing state to the new user if it exists
+      // if (roomDrawingStates.has(roomID.toString())) {
+      //   socket.emit(SOCKET_TYPE.DRAWING_UPDATE, roomDrawingStates.get(roomID.toString()));
+      // }
+
       socket.to(roomID).emit(SOCKET_TYPE.JOIN_SUCCESS, {
         username,
         totalUsers: roomsAsAgust.filter((u) => u.roomID === roomID).length,
@@ -112,6 +123,43 @@ io.on(SOCKET_TYPE.CONNECT, (socket) => {
   socket.on(SOCKET_TYPE.LEAVE, () => {
     const roomID = findRoomById(socket.id);
     socket.in(socket.io).socketsLeave(roomID);
+  });
+
+  socket.on("excalidraw-changes", (update: any) => {
+    try {
+      const roomID = findRoomById(socket.id);
+      console.log(update.elements);
+      socket.to(roomID).emit("remote-update", update);
+    } catch (error) {
+      console.error("Error handling drawing update:", error);
+      socket.emit(
+        SOCKET_TYPE.DRAWING_ERROR,
+        "Failed to process drawing update"
+      );
+    }
+  });
+
+  // Handle disconnection
+  socket.on("disconnect", () => {
+    try {
+      const roomID = findRoomById(socket.id);
+      const index = roomsAsAgust.findIndex(
+        (user) => user.socketId === socket.id
+      );
+
+      if (index !== -1) {
+        const user = roomsAsAgust[index];
+        roomsAsAgust.splice(index, 1);
+
+        // Notify other users in the room
+        socket.to(roomID).emit(SOCKET_TYPE.JOIN_SUCCESS, {
+          username: user.username,
+          totalUsers: roomsAsAgust.filter((u) => u.roomID === roomID).length,
+        });
+      }
+    } catch (error) {
+      console.error("Error handling disconnection:", error);
+    }
   });
 });
 
