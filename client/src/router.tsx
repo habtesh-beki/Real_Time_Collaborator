@@ -5,13 +5,12 @@ import Signup from "./components/auth/SignUp";
 import GustPage from "./components/auth/GustPage";
 import Layout from "./pages/Layout";
 import JoinRoom from "./pages/roomJoinPage";
-import DrawingPage from "./futures/Drawing/drawingPage";
+// import DrawingPage from "./futures/Drawing/drawingPage";
 
 export const router = createBrowserRouter([
   {
     path: "/",
     element: <Starter />,
-    // element: <DrawingPage />,
   },
   {
     path: "/joinroom",

@@ -9,4 +9,6 @@ export const SOCKET_TYPE = {
   LEAVE: "leave",
   ERROR: "Error-join",
   JOIN_SUCCESS: "join-success",
+  DRAWING_UPDATE: "drawing-update",
+  DRAWING_ERROR: "drawing-error"
 };
