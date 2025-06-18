@@ -1,107 +1,59 @@
-// import { Tldraw } from "tldraw";
-import "tldraw/tldraw.css";
-
-import { useSync } from "@tldraw/sync";
+import { Excalidraw } from "@excalidraw/excalidraw";
+import { OrderedExcalidrawElement } from "@excalidraw/excalidraw/element/types";
+import "@excalidraw/excalidraw/index.css";
+import { useEffect, useState } from "react";
+import { socket } from "../../App";
 import {
-  AssetRecordType,
-  getHashForString,
-  TLAssetStore,
-  TLBookmarkAsset,
-  Tldraw,
-  uniqueId,
-} from "tldraw";
+  AppState,
+  BinaryFiles,
+  ExcalidrawImperativeAPI,
+} from "@excalidraw/excalidraw/types";
 
-const WORKER_URL = `http://localhost:3000`;
+export default function CanvasBoard() {
+  const [excalidrawAPI, setExcalidrawAPI] =
+    useState<ExcalidrawImperativeAPI | null>(null);
 
-// In this example, the room ID is hard-coded. You can set this however you like though.
-const roomId = "test-room";
+  const handleChange = (
+    excalidrawElements: readonly OrderedExcalidrawElement[],
+    appState: AppState,
+    files: BinaryFiles
+  ) => {
+    const { collaborators, ...appStateWithoutCollaborators } = appState;
+    socket.emit("excalidraw-changes", {
+      elements: excalidrawElements,
+      appState: appStateWithoutCollaborators,
+      files,
+    });
+  };
 
-export default function DrawingPage() {
-  const store = useSync({
-    // We need to know the websocket's URI...
-    uri: `${WORKER_URL}/connect/${roomId}`,
-    // ...and how to handle static assets like images & videos
-    assets: multiplayerAssets,
-  });
+  useEffect(() => {
+    if (!excalidrawAPI) return;
+
+    const updateFromRemote = (data: {
+      elements: readonly OrderedExcalidrawElement[];
+      appState: AppState;
+      files: BinaryFiles;
+    }) => {
+      excalidrawAPI.updateScene({
+        elements: data.elements,
+        appState: data.appState,
+      });
+    };
+
+    socket.on("remote-update", updateFromRemote);
+
+    return () => {
+      socket.off("remote-update", updateFromRemote);
+    };
+  }, [excalidrawAPI]);
+
   return (
-    <div style={{ position: "fixed", inset: 0 }}>
-      <Tldraw
-        // we can pass the connected store into the Tldraw component which will handle
-        // loading states & enable multiplayer UX like cursors & a presence menu
-        store={store}
-        onMount={(editor) => {
-          // @ts-expect-error
-          window.editor = editor;
-          // when the editor is ready, we need to register out bookmark unfurling service
-          editor.registerExternalAssetHandler("url", unfurlBookmarkUrl);
-        }}
+    <div className="w-full h-screen">
+      <Excalidraw
+        onChange={handleChange}
+        isCollaborating={true}
+        excalidrawAPI={(api) => setExcalidrawAPI(api)}
       />
     </div>
   );
 }
-
-// How does our server handle assets like images and videos?
-const multiplayerAssets: TLAssetStore = {
-  // to upload an asset, we prefix it with a unique id, POST it to our worker, and return the URL
-  async upload(_asset, file) {
-    const id = uniqueId();
-
-    const objectName = `${id}-${file.name}`;
-    const url = `${WORKER_URL}/uploads/${encodeURIComponent(objectName)}`;
-
-    const response = await fetch(url, {
-      method: "PUT",
-      body: file,
-    });
-
-    if (!response.ok) {
-      throw new Error(`Failed to upload asset: ${response.statusText}`);
-    }
-
-    return { src: url };
-  },
-  // to retrieve an asset, we can just use the same URL. you could customize this to add extra
-  // auth, or to serve optimized versions / sizes of the asset.
-  resolve(asset) {
-    return asset.props.src;
-  },
-};
-
-// How does our server handle bookmark unfurling?
-async function unfurlBookmarkUrl({
-  url,
-}: {
-  url: string;
-}): Promise<TLBookmarkAsset> {
-  const asset: TLBookmarkAsset = {
-    id: AssetRecordType.createId(getHashForString(url)),
-    typeName: "asset",
-    type: "bookmark",
-    meta: {},
-    props: {
-      src: url,
-      description: "",
-      image: "",
-      favicon: "",
-      title: "",
-    },
-  };
-
-  try {
-    const response = await fetch(
-      `${WORKER_URL}/unfurl?url=${encodeURIComponent(url)}`
-    );
-    const data = await response.json();
-
-    asset.props.description = data?.description ?? "";
-    asset.props.image = data?.image ?? "";
-    asset.props.favicon = data?.favicon ?? "";
-    asset.props.title = data?.title ?? "";
-  } catch (e) {
-    console.error(e);
-  }
-
-  return asset;
-}
-
-// export default App
