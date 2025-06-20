@@ -4,6 +4,7 @@ import MainSidebar from "../components/MainSidebar";
 import EditorPage from "../futures/codeEditor/EditorPage";
 import CanvasBoard from "../futures/Drawing/drawingPage";
 import { useState } from "react";
+import EditorSideBar from "../futures/codeEditor/components/EditorSide";
 
 export default function Layout() {
   const [codeMode, setCodeMode] = useState(true);
@@ -25,6 +26,7 @@ export default function Layout() {
       </div>
       <div className="flex w-full">
         <MainSidebar setCodeMode={setCodeMode} />
+        <EditorSideBar />
         {codeMode && <EditorPage />}
         {!codeMode && <CanvasBoard />}
       </div>
