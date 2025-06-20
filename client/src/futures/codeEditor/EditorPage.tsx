@@ -12,7 +12,7 @@ interface IModelContentChangedEvent {
   readonly isFlush: boolean;
 }
 export default function EditorPage() {
-  const [code, setNewCode] = useState("/start coding...");
+  const [code, setNewCode] = useState("//start coding...");
   function handleEditorChange(
     value: string | undefined,
     event: IModelContentChangedEvent

@@ -11,6 +11,8 @@
   "license": "ISC",
   "packageManager": "pnpm@10.5.2",
   "dependencies": {
+    "@google/genai": "^1.5.1",
+    "@google/generative-ai": "^0.24.1",
     "@prisma/client": "6.6.0",
     "@types/cors": "^2.8.18",
     "@types/express": "^5.0.1",

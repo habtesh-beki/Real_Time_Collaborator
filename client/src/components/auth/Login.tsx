@@ -12,8 +12,8 @@ export default function Login() {
         </h2>
         <div className="flex flex-col gap-3">
           <div className="flex flex-col gap-3">
-            <Input className="text-black" placeholder="email" />
-            <Input className="text-white" placeholder="password" />
+            <Input className="text-black" placeholder="Email" />
+            <Input className="text-white" placeholder="Password" />
           </div>
           <Button className="cursor-pointer mt-4">Login</Button>
         </div>
