@@ -5,10 +5,17 @@ import { SOCKET_TYPE } from "./types";
 import { auth } from "./lib/auth";
 import LoginRoute from "./routes/login.route";
 import { toNodeHandler } from "better-auth/node";
+// import { Configuration, OpenAIApi } from 'openai';
+// import { GoogleGenerativeAI } from "@google/generative-ai";
+import { GoogleGenAI } from "@google/genai";
+import { configDotenv } from "dotenv";
 import cors from "cors";
 
+configDotenv();
 const app = express();
 const server = http.createServer(app);
+
+app.use(express.json());
 
 app.use(
   cors({
@@ -21,7 +28,7 @@ const io = new Server(server, {
     origin: "*",
   },
 });
-
+app.use(express.json());
 type GustType = {
   username: String;
   roomID: String;
@@ -49,7 +56,10 @@ const getUserBySocketId = (socketId: string) => {
 };
 
 // Store drawing states for each room
-const roomDrawingStates = new Map<string, any>();
+// const roomDrawingStates = new Map<string, any>();
+
+// const genAI = new GoogleGenerativeAI(process.env.Gemini_API_KEY as string);
+const ai = new GoogleGenAI({ apiKey: process.env.Gemini_API_KEY });
 
 io.on(SOCKET_TYPE.CONNECT, (socket) => {
   console.log("socket connected with the id:", socket.id);
@@ -164,6 +174,25 @@ io.on(SOCKET_TYPE.CONNECT, (socket) => {
 });
 
 app.use(LoginRoute);
+app.post("/api/chat", async (req, res) => {
+  const message = req.body.message;
+  // console.log(req.body.message);
+  // console.log(message);
+  try {
+    const response = await ai.models.generateContent({
+      model: "gemini-2.5-flash",
+      contents: message,
+    });
+    // const text = response.candidates?.text[0].content.parts[0].text;
+    // const aiReply = response
+
+    // console.log(text);
+    res.json({ response });
+  } catch (err) {
+    console.error("Gemini Error:", err);
+    res.status(500).send("Error generating response");
+  }
+});
 app.all("/api/auth/{*any}", toNodeHandler(auth));
 
 server.listen(3000, () => {
