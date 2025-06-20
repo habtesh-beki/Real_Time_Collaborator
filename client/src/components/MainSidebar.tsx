@@ -9,7 +9,6 @@ import {
 } from "lucide-react";
 
 type ChildProps = {
-  // codeMode: boolean;
   setCodeMode: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
